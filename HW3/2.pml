@@ -94,11 +94,6 @@ never {
 			fi;
 		fi;		
 		}
-	S2: 
-		if
-		:: len(ElevatorArrived) == 1 -> goto S1
-		:: else -> goto S2
-		fi;
 	S3: skip
 }
 
