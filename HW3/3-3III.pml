@@ -39,7 +39,7 @@ S5:	atomic {
 		for (i : 0 .. N-1) {
 			if 
 			:: flag[i] == 4 -> goto S6 
-			:: else -> skip
+			:: else -> skip 
 			fi;
 			goto S5
 			}
@@ -55,12 +55,6 @@ S7: atomic {
 		}
 	}
 S8: atomic{ counter ++; state[self] = 8}
-atomic {
-	//assert that we have the lowest index of anything currently here. 
-	for (i : 0 .. self-1){
-		assert flag[i] < 5 // This checks the property requested.
-	}
-}
 assert(counter == 1) 
 S9: counter -- 
 S10: atomic {
@@ -72,9 +66,17 @@ S10: atomic {
 			fi;
 		}
 	}
-S11: atomic { flag[self] = 0; state[self] = 10; } 
+S11: atomic { flag[self] = 0; state[self] = 10;
+			for (i: 0 .. N -1) {
+					if
+						::state[i] > 3 -> 
+							assert( flag[i] == 4 ) 
+					fi;
+				}			
+			} 
 	 goto S1
 }
+
 
 init {
 	int j 
