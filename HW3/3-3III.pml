@@ -68,9 +68,14 @@ S10: atomic {
 	}
 S11: atomic { flag[self] = 0; state[self] = 10;
 			for (i: 0 .. N -1) {
-					if
-						::state[i] > 3 -> 
-							assert( flag[i] == 4 ) 
+					if 
+						:: i != self -> 
+							if
+							::state[i] > 4 && state[i] < 10 -> 
+								assert( flag[i] == 4 ) 
+							:: else -> skip
+							fi;
+						:: else -> skip
 					fi;
 				}			
 			} 

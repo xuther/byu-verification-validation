@@ -19,6 +19,11 @@ S0:		atomic {
 				:: else -> skip
 				fi;
 			}
+
+			
+		for (i: 0 .. N-1) {
+			assert(state[i] > 9 || state[i] < 6)//there's no process in the inner sanctum 
+		}
 		goto S2
 		}	
 	od
@@ -68,22 +73,6 @@ S10: atomic {
 	}
 S11: atomic { flag[self] = 0; state[self] = 10; } 
 	 goto S1
-}
-
-never {
-	S0: if 
-		:: state[2] == 2 -> goto S1//we're at the door.
-		:: else -> goto S0
-		fi;
-	S1: atomic {//check if there's anything in the inner  sanctum. 
-		if 
-		:: state[0] >= 6 && state[0] < 10 -> goto S2
-		:: state[1] >= 6 && state[1] < 10 -> goto S2
-		:: state[3] >= 6 && state[3] < 10 -> goto S2
-		:: else -> goto S0
-		fi;
-	}
-	S2: 
 }
 
 init {
