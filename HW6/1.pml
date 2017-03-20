@@ -111,13 +111,13 @@ never {
 }
 	//Elevator repeatedly returns to the ground floor
 never {
-	S0: do
+	progress_S0: do
 		:: elevatorPosition == 0 -> skip
-		:: else -> goto accept_S1
+		:: else -> goto S1
 	od
-	accept_S1:
+	S1:
 		do
-		:: elevatorPosition == 0 -> goto S0
+		:: elevatorPosition == 0 -> goto progress_S0
 		:: else -> skip
 		od;
 	}
