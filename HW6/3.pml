@@ -6,6 +6,7 @@ chan comms[N] = [10] of {int} //this is unbounded, but we choose an arbitrarily 
 
 chan elected = [1] of {int}
 int count = 0
+int finalElected = -1
 
 //This validates claim 1 and 2. If all the processes end in a valid state we know that There was exactly one leader elected. 
 proctype process(int ident) {
@@ -99,6 +100,7 @@ end: count++
 	if 
 	:: count == N -> //wait until the last process leaves
 		elected?c
+        finalElected = c
 		//assert (c == N-1) //assert that the leader was the highest numbered process
 	:: else -> skip
 	fi;	
@@ -107,18 +109,24 @@ end: count++
 //Assert only ever one elected. This feels odd as the model is built in such a way that there can only ever be one elected leader
 never {
     do
-        :: len(elected) > 1 -> goto break 
+        :: len(elected) > 1 -> break
     od;
 }
 
-
+//assert that a leader is always elected. Again, odd beacuse if the model gets to a valid end state, it means a leader was elected
 never {
+     do
+        :: assert(pc_value(0) != 96)
+     od;
 
-    }
+}
 
+//assert that the final elected leader is the leader with the highest pid
 never {
-
-    }
+    do 
+        :: finalElected != -1 && finalElected != N-1 -> break
+    od;
+}
 
 init {
 atomic {
@@ -127,4 +135,4 @@ atomic {
 			run process(i)	
 		}
 	}
-	}
+}

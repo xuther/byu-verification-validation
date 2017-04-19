@@ -1,0 +1,13 @@
+spin: 4.pml:85, Error: value (-1->255 (8)) truncated in assignment
+      timeout
+#processes: 5
+		queue 1 (TokenRing[0]): 
+		queue 2 (TokenRing[1]): [message,2][message,2]
+		queue 3 (TokenRing[2]): [message,2][message,2][message,0][message,0]
+		queue 4 (TokenRing[3]): [0,255][message,1][message,3][message,0]
+383:	proc  4 (node:1) 4.pml:18 (state 78)
+383:	proc  3 (node:1) 4.pml:26 (state 7)
+383:	proc  2 (node:1) 4.pml:78 (state 59)
+383:	proc  1 (node:1) 4.pml:18 (state 78)
+383:	proc  0 (:init::1) 4.pml:106 (state 11) <valid end state>
+5 processes created
