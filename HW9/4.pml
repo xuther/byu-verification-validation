@@ -104,7 +104,7 @@ ltl a { [](node[1]:color == black -> <> (node[1]:color == white)) }
 ltl b { []( 1 ) }
 
 //Validate that we always send a message after recieving one
-ltl c { [](node[1]@S3 || node[1]@S13 || node[1]@S21 -> <>(node[1]@S21 || node[1]@S12 || node[1]@S13 || node[1]@S18 || node[1]@S19 || node[1]@S22 || node[1]@S21 || node[1]@S15 || node[1]@S5 || node[1]@S5)
+ltl c { [](node[1]@S3 || node[1]@S13 || node[1]@S21 -> <>(node[1]@S21 || node[1]@S12 || node[1]@S13 || node[1]@S18 || node[1]@S19 || node[1]@S22 || node[1]@S21 || node[1]@S15 || node[1]@S5 || node[1]@S5) ) }
 
 //Test that we only terminate when there are no outstanding messages
 ltl d { []( node[1]@end -> node[1]:messageCount == 0 && node[3]:messageCount == 0 && node[2]:messageCount ==0) }
