@@ -1,5 +1,5 @@
 #ifndef N
- #define N 4
+ #define N 3
 #endif
 
 mtype = {white, black, terminate, message, act, pass}
@@ -17,88 +17,137 @@ proctype node(int me) {
 
 	do
 		:: TokenRing[me]?message(messageContents) -> 
-			messageCount++
+			S0: messageCount++
 			if 
 			:: messageContents == me -> 
-				color = black
+			S1:	color = black
 				state = act
 			:: messageContents != me -> 
-				TokenRing[((me+1)%N)]!message(messageContents)
+            S2: TokenRing[((me+1)%N)]!message(messageContents)
 				messageCount--	
 				color = black
 		fi;
 		:: TokenRing[me]?white(messageContents) -> 
-			tokenCount = messageContents 
+			S3: tokenCount = messageContents 
 				if 
 			:: me == 0 -> 
-					if 
+		S4:			if 
 				:: state == pass && color == white && tokenCount + messageCount == 0 ->
-						TokenRing[((me+1)%N)]!terminate(me) //Success, terminate
+		S5:				TokenRing[((me+1)%N)]!terminate(me) //Success, terminate
 					break //end
 					:: else -> 
-					TokenRing[((me+1)%N)]!white(0) //start a new detection probe
+		S6:		TokenRing[((me+1)%N)]!white(0) //start a new detection probe
 					fi;
 			:: else ->		
-					if 
+		S7:			if 
 				:: state == act -> 
-						hasToken = true
+		S8:				hasToken = true
 					if 
 						:: color == white -> 
-						tokenColor = white
+		S9:				tokenColor = white
 						:: color == black -> 
-						tokenColor = black
+		s10:			tokenColor = black
 						fi;
 				:: state == pass -> 
-						if 
+				S11:		if 
 					:: color == white ->
-							tokenColor = white
+				S12:			tokenColor = white
 						//pass on the token
 							TokenRing[((me+1)%N)]!white(tokenCount + messageCount)
 					:: color == black 
-							tokenColor = black 
+				S13:			tokenColor = black 
 						TokenRing[((me+1)%N)]!black(tokenCount + messageCount)
 							color = white
 					fi;
 					fi;
 			fi;
 			:: TokenRing[me]?black(messageContents) -> 
-			tokenCount = messageContents
+			S14: tokenCount = messageContents
 				if 
 			:: me == 0 -> 
-					TokenRing[((me+1)%N)]!white(me)
+				S15:	TokenRing[((me+1)%N)]!white(me)
 			:: else -> 
-					if 
+				S16:	if 
 				::state == act -> 
-						hasToken = true
+				S17:		hasToken = true
 				:: state == pass -> 
-						TokenRing[((me+1)%N)]!black(tokenCount + messageCount)
+				S18:		TokenRing[((me+1)%N)]!black(tokenCount + messageCount)
 				fi;
 				fi;
 		:: state == act ->
-					 TokenRing[((me+1)%N)]!message((me + 3)%N)  -> //send a message 
+        S19:	 TokenRing[((me+1)%N)]!message((me + 3)%N)  -> //send a message 
 				 tokenCount--;
 					 color = black;
 		:: state == act -> 
-				state = pass; 
+		S201:		state = pass; 
 			if 
 				:: hasToken == true ->
-				 TokenRing[(me+1)%N]!tokenColor(tokenCount + messageCount);
+		S20:		 TokenRing[(me+1)%N]!tokenColor(tokenCount + messageCount);
 					 hasToken = false;
 			:: else -> skip
 				fi;
 		:: 	TokenRing[me]?terminate(messageContents) -> 
-					assert(state == pass)
+		S21:			assert(state == pass)
 				TokenRing[(me+1)%N]!terminate(me)
 					break
 		:: startedToken == false && me == 0 -> 
-					TokenRing[me+1%N]!white(0);
+		S22:			TokenRing[me+1%N]!white(0);
 				startedToken = true;
 	od
+    end: skip
 }
 
+//validate that if a node goes blac, it eventually turns white
+never {
+    true;
+    S0:     if 
+            :: node[1]:color == black -> skip;
+            :: else -> goto S0;
+            fi;
+    accept: if
+            :: node[1]:color == white -> goto S0;
+            fi;
+}
+//I'm not sure how to prove number 2 - as the program is written such that I turn black whenever I recieve a messge, but I only recieve messages from those with a lower pID, but I never send them there. 
+//So... i'll come back to this if I have time
+never {
+    do
+        :: true;
+    od;
+    }
+
+
+//Validate that we always send a message after recieving one
+never {
+    S0: do
+        :: node[1]@S3 || node[1]@S13 || node[1]@S21 -> break
+        :: else
+        od;
+
+        accept: do
+                :: !node[1]@S21 && !node[1]@S12 && !node[1]@S13 && !node[1]@S18 && !node[1]@S19 && !node[1]@S22 && !node[1]@S21 && !node[1]@S15 && !node[1]@S5 && !node[1]@S5 
+                od
+    }
+
+//Test that we only terminate when there are no outstanding messages
+never: {
+    do
+        :: node[1]@end -> 
+            if
+                ::node[1]:messageCount == 0 && node[3]:messageCount == 0 && node[2]:messageCount ==0
+                :: else -> break
+            fi;
+        :: else
+    od;
+
+
+
+    }
+
+
 init {
-	byte i 
 	atomic {
+        byte i 
 		for (i : 0 .. (N-1)) {
 		run node(i)
 		}
